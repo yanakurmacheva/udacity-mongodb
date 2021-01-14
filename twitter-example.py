@@ -44,7 +44,8 @@ def unique_mentions(db, limit):
     Returns a subset of users with the most mentions.
     '''
     pipeline = [{'$unwind': '$entities.user_mentions'},
-                {'$group': {'_id': '$user.screen_name', 'mentions': {'$addToSet': '$entities.user_mentions.screen_name'}}},
+                {'$group': {'_id': '$user.screen_name',
+                            'mentions': {'$addToSet': '$entities.user_mentions.screen_name'}}},
                 {'$unwind': '$mentions'}, {'$group': {'_id': '$_id', 'count': {'$sum': 1}}},
                 {'$sort': {'count': -1}}, {'$limit': limit}]
     # aggregation operations return a cursor object
