@@ -19,8 +19,8 @@ CHECK = True
 def convert_json(pathname):
     '''Deserializes a JSON file.'''
     data = []
-    for line in open(pathname):
-        data.append(json.loads(line))
+    for doc in open(pathname):
+        data.append(json.loads(doc))
     return data
 
 def check_collection(db, collection, pathname):
@@ -55,7 +55,7 @@ client = MongoClient(CONNECTION_STRING)
 db = client[DATABASE]
 
 if CHECK:
-    check_collection(db, 'tweets', 'data/twitter.json')
+    check_collection(db, 'tweets', 'datasets/twitter.json')
 
 result = unique_mentions(db, 3)
 pprint.pprint(list(result))

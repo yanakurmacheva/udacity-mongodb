@@ -4,29 +4,30 @@
 import csv
 import os
 
-DIRECTORY = "data"
-FILE = "thebeatles-discography.csv"
+DIRECTORY = 'datasets'
+FILE = 'thebeatles-discography.csv'
 
-def parse_file(datafile):
-    '''Converts each of the first 10 lines in datafile (not including the header)
+def parse_file(pathname):
+    '''Converts each of the first 10 lines in file (not including the header)
     into a dictionary of column name/field value pairs.
     '''
-    with open(datafile, 'r') as f:
-        lines = f.readlines()
-        albums = [line.strip().split(',') for line in lines[0:11]]
-        data = [dict(zip(albums[0], album)) for album in albums[1:11]]
-    return data
+    with open(pathname, 'r') as file:
+        lines = file.readlines()[:11]
+        lines = [line.strip().split(',') for line in lines]
+        header = lines[0]
+        albums = [dict(zip(header, line)) for line in lines[1:]]
+    return albums
 
 # handle the problematic line
-def parse_csv(datafile):
-    with open(datafile, 'r') as f:
-        reader = csv.DictReader(f)
-        data = [row for row in reader]
-    return data
+def parse_csv(pathname):
+    with open(pathname, 'r') as file:
+        reader = csv.DictReader(file)
+        albums = [row for row in reader]
+    return albums
 
 def test():
-    datafile = os.path.join(DIRECTORY, FILE)
-    result = parse_file(datafile)
+    pathname = os.path.join(DIRECTORY, FILE)
+    result = parse_file(pathname)
     firstline = {'Title': 'Please Please Me', 'UK Chart Position': '1', 'Label': 'Parlophone(UK)', 'Released': '22 March 1963', 'US Chart Position': '-', 'RIAA Certification': 'Platinum', 'BPI Certification': 'Gold'}
     tenthline = {'Title': '', 'UK Chart Position': '1', 'Label': 'Parlophone(UK)', 'Released': '10 July 1964', 'US Chart Position': '-', 'RIAA Certification': '', 'BPI Certification': 'Gold'}
 
