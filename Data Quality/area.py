@@ -1,56 +1,49 @@
-#!/usr/bin/env python
-# coding: utf-8
+# Quiz: Fixing the Area
+# Starter code provided by Udacity
 
-"""
-In this problem set you work with cities infobox data, audit it, come up with a
-cleaning idea and then clean it up.
-
-Since in the previous quiz you made a decision on which value to keep for the
-"areaLand" field, you now know what has to be done.
-
-Finish the function fix_area(). It will receive a string as an input, and it
-has to return a float representing the value of the area or None.
-You have to change the function fix_area. You can use extra functions if you
-like, but changes to process_file will not be taken into account.
-The rest of the code is just an example on how this function can be used.
-"""
-
-import codecs
 import csv
-import json
+import os
 import pprint
 
+DIRECTORY = '../datasets'
 CITIES = 'cities.csv'
 
+def skip_lines(file, n):
+    '''Skips the first n lines of a file.'''
+    for i in range(0, n):
+        next(file)
+
 def fix_area(area):
+    '''Returns the value with more significant digits
+    when areaLand contains an array.
+    '''
+    if area == 'NULL':
+        return None
+    elif area.startswith('{'):
+        values = area.strip('{}').split('|')
+        values.sort(key=lambda s: len(s), reverse=True)
+        value = values[0]
+        return float(value)
+    else:
+        return float(area)
 
-    # YOUR CODE HERE
-
-    return area
-
-def process_file(filename):
-    # CHANGES TO THIS FUNCTION WILL BE IGNORED WHEN YOU SUBMIT THE EXERCISE
+def process_file(pathname):
     data = []
 
-    with open(filename, 'r') as f:
-        reader = csv.DictReader(f)
+    with open(pathname) as file:
+        reader = csv.DictReader(file)
+        skip_lines(reader, 3)
 
-        #skipping the extra metadata
-        for i in range(3):
-            l = reader.next()
-
-        # processing file
         for line in reader:
-            # calling your function to fix the area value
             if 'areaLand' in line:
                 line['areaLand'] = fix_area(line['areaLand'])
             data.append(line)
-
     return data
 
 
 def test():
-    data = process_file(CITIES)
+    pathname = os.path.join(DIRECTORY, CITIES)
+    data = process_file(pathname)
 
     print('Printing three example results:')
     for n in range(5,8):
@@ -62,5 +55,4 @@ def test():
     assert data[33]['areaLand'] == 20564500.0
 
 
-if __name__ == '__main__':
-    test()
+test()

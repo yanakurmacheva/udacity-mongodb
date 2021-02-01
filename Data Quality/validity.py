@@ -1,51 +1,67 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-"""
-Your task is to check the "productionStartYear" of the DBPedia autos datafile for valid values.
-The following things should be done:
-- check if the field "productionStartYear" contains a year
-- check if the year is in range 1886-2014
-- convert the value of the field to be just a year (not full datetime)
-- the rest of the fields and values should stay the same
-- if the value of the field is a valid year in the range as described above,
-  write that line to the output_good file
-- if the value of the field is not a valid year as described above,
-  write that line to the output_bad file
-- discard rows (neither write to good nor bad) if the URI is not from dbpedia.org
-- you should use the provided way of reading and writing data (DictReader and DictWriter)
-  They will take care of dealing with the header.
-
-You can write helper functions for checking the data and writing the files, but we will call only the
-'process_file' with 3 arguments (inputfile, output_good, output_bad).
-"""
+# Quiz: Correcting Validity
+# Starter code provided by Udacity
 
 import csv
-import pprint
+import re
+import os
 
 INPUT_FILE = 'autos.csv'
 OUTPUT_GOOD = 'autos-valid.csv'
 OUTPUT_BAD = 'FIXME-autos.csv'
 
+def skip_lines(file, n):
+    '''Skips the first n lines of a file.'''
+    for i in range(0, n):
+        next(file)
+
+def filter_year(reader):
+    '''Defines a category for each row based on
+    the productionStartYear field.
+
+    Categories - {good, bad}.
+    '''
+    good, bad = [], []
+    year_re = re.compile('\d{4}(?=-)')
+
+    for row in reader:
+        timestamp = row['productionStartYear']
+        match = year_re.search(timestamp)
+
+        try:
+            year = int(match.group())
+            row['productionStartYear'] = year
+
+            if 1885 < year < 2015:
+                good.append(row)
+            else:
+                bad.append(row)
+        except:
+            bad.append(row)
+
+    return good, bad
+
+def write_to_csv(filename, data, header):
+    '''Writes data to CSV.'''
+    with open(filename, 'w') as file:
+        writer = csv.DictWriter(file, delimiter=',', fieldnames=header)
+        writer.writeheader()
+        writer.writerows(data)
+
 def process_file(input_file, output_good, output_bad):
-    with open(input_file, 'r') as f:
-        reader = csv.DictReader(f)
+    with open(input_file) as file:
+        reader = csv.DictReader(file)
         header = reader.fieldnames
 
-        #COMPLETE THIS FUNCTION
+        skip_lines(reader, 3)
+        good, bad = filter_year(reader)
 
-    # This is just an example on how you can use csv.DictWriter
-    # Remember that you have to output 2 files
-    with open(output_good, 'w') as g:
-        writer = csv.DictWriter(g, delimiter=',', fieldnames=header)
-        writer.writeheader()
-        for row in YOURDATA:
-            writer.writerow(row)
+    write_to_csv(output_good, good, header)
+    write_to_csv(output_bad, bad, header)
 
 
 def test():
-    process_file(INPUT_FILE, OUTPUT_GOOD, OUTPUT_BAD)
+    pathname = os.path.join('../datasets', INPUT_FILE)
+    process_file(pathname, OUTPUT_GOOD, OUTPUT_BAD)
 
 
-if __name__ == '__main__':
-    test()
+test()

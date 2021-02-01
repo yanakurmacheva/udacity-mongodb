@@ -1,42 +1,11 @@
-#!/usr/bin/env python
-# coding: utf-8
+# Quiz: Auditing Data Quality
+# Starter code provided by Udacity
 
-"""
-In this problem set you work with cities infobox data, audit it, come up with a
-cleaning idea and then clean it up. In the first exercise we want you to audit
-the datatypes that can be found in some particular fields in the dataset.
-The possible types of values can be:
-- NoneType if the value is a string "NULL" or an empty string ""
-- list, if the value starts with "{"
-- int, if the value can be cast to int
-- float, if the value can be cast to float, but CANNOT be cast to int.
-    For example, '3.23e+07' should be considered a float because it can be cast
-    as float but int('3.23e+07') will throw a ValueError
-- 'str', for all other values
-
-The audit_file function should return a dictionary containing fieldnames and a
-SET of the types that can be found in the field. e.g.
-
-{"field1": set([type(float()), type(int()), type(str())]),
- "field2": set([type(str())]),
-  ....
-}
-
-The type() function returns a type object describing the argument given to the
-function. You can also use examples of objects to create type objects, e.g.
-type(1.1) for a float: see the test function below for examples.
-
-Note that the first three rows (after the header row) in the cities.csv file
-are not actual data points. The contents of these rows should not be included
-when processing data types. Be sure to include functionality in your code to
-skip over or detect these rows.
-"""
-
-import codecs
 import csv
-import json
+import os
 import pprint
 
+DIRECTORY = '../datasets'
 CITIES = 'cities.csv'
 
 FIELDS = ['name', 'timeZone_label', 'utcOffset', 'homepage', 'governmentType_label',
@@ -44,21 +13,64 @@ FIELDS = ['name', 'timeZone_label', 'utcOffset', 'homepage', 'governmentType_lab
           'maximumElevation', 'minimumElevation', 'populationDensity',
           'wgs84_pos#lat', 'wgs84_pos#long', 'areaLand', 'areaMetro', 'areaUrban']
 
-def audit_file(filename, fields):
-    fieldtypes = {}
+def skip_lines(file, n):
+    '''Skips the first n lines of a file.'''
+    for i in range(0, n):
+        next(file)
 
-    # YOUR CODE HERE
+def is_integer(string):
+    '''Checks whether a string can be converted
+    to an integer.
+    '''
+    try:
+        int(string)
+        return True
+    except ValueError:
+        return False
+
+def is_float(string):
+    '''Checks whether a string can be converted
+    to a float.
+    '''
+    try:
+        float(string)
+        return True
+    except ValueError:
+        return False
+
+def audit_file(pathname, fields):
+    '''Lists all data types found in a field.'''
+    fieldtypes = {}
+    for field in fields:
+        fieldtypes[field] = set()
+
+    with open(pathname) as file:
+        reader = csv.DictReader(file)
+        skip_lines(reader, 3)
+
+        for row in reader:
+            for field in fields:
+                if row[field] == 'NULL' or row[field] == '':
+                    fieldtypes[field].add(type(None))
+                elif row[field].startswith('{'):
+                    fieldtypes[field].add(type(list()))
+                elif is_integer(row[field]):
+                    fieldtypes[field].add(type(int()))
+                elif is_float(row[field]):
+                    fieldtypes[field].add(type(float()))
+                else:
+                    fieldtypes[field].add(type(str()))
 
     return fieldtypes
 
 
 def test():
-    fieldtypes = audit_file(CITIES, FIELDS)
+    pathname = os.path.join(DIRECTORY, CITIES)
+    fieldtypes = audit_file(pathname, FIELDS)
     pprint.pprint(fieldtypes)
 
     assert fieldtypes['areaLand'] == set([type(1.1), type([]), type(None)])
     assert fieldtypes['areaMetro'] == set([type(1.1), type(None)])
 
 
-if __name__ == '__main__':
-    test()
+test()
