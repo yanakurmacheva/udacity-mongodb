@@ -1,6 +1,6 @@
 # Data Wrangling with MongoDB
 
-Course Description – [link](https://www.udacity.com/course/data-wrangling-with-mongodb--ud032)  
+See [course description](https://www.udacity.com/course/data-wrangling-with-mongodb--ud032).  
 
 _Useful links:_
 
